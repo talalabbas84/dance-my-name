@@ -70,6 +70,11 @@ export function useRhythmEngine() {
       engine.setVolume(volume);
       engine.setMuted(muted);
       await engine.resume();
+      // A constructed AudioContext can still fail to actually reach
+      // "running" on some mobile browsers even after resume() — reflect
+      // that honestly so the muted-audio hint shows up instead of silently
+      // pretending sound will play.
+      setAudioAvailable(engine.isAudioRunning);
       setCurrentBeat(-1);
       engine.start(pattern, slotDuration, (beatIndex) => setCurrentBeat(beatIndex), notes ?? [], style);
       setIsPlaying(true);
@@ -84,7 +89,10 @@ export function useRhythmEngine() {
       const ready = engine.init();
       setAudioAvailable(ready);
       if (!ready) return;
-      void engine.resume();
+      engine
+        .resume()
+        .then(() => setAudioAvailable(engine.isAudioRunning))
+        .catch(() => undefined);
       engine.setVolume(volume);
       engine.setMuted(muted);
       engine.playOneShot(hit);
@@ -99,7 +107,10 @@ export function useRhythmEngine() {
       const ready = engine.init();
       setAudioAvailable(ready);
       if (!ready) return;
-      void engine.resume();
+      engine
+        .resume()
+        .then(() => setAudioAvailable(engine.isAudioRunning))
+        .catch(() => undefined);
       engine.setVolume(volume);
       engine.setMuted(muted);
       engine.singOneShot(note, style);

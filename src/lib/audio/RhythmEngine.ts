@@ -49,6 +49,7 @@ export class RhythmEngine {
       this.masterGain = this.ctx.createGain();
       this.masterGain.gain.value = this.muted ? 0 : this.volume;
       this.masterGain.connect(this.ctx.destination);
+      this.unlockForMobile();
       return true;
     } catch {
       this.ctx = null;
@@ -61,8 +62,40 @@ export class RhythmEngine {
     return this.ctx !== null;
   }
 
+  /** Whether audio will actually be audible right now — distinct from
+   * `isSupported`, which only means the AudioContext could be constructed. */
+  get isAudioRunning(): boolean {
+    return this.ctx?.state === "running";
+  }
+
+  /**
+   * Some mobile browsers (iOS Safari especially) keep a freshly-created
+   * AudioContext silent until a real buffer has actually played through it —
+   * a `resume()` call alone can report success without any sound following.
+   * Playing a near-silent one-sample buffer immediately, in the same user
+   * gesture that created the context, is the standard workaround.
+   */
+  private unlockForMobile() {
+    if (!this.ctx) return;
+    try {
+      const buffer = this.ctx.createBuffer(1, 1, this.ctx.sampleRate);
+      const source = this.ctx.createBufferSource();
+      source.buffer = buffer;
+      source.connect(this.ctx.destination);
+      source.start(0);
+    } catch {
+      // Best-effort unlock only — playback still proceeds without it.
+    }
+  }
+
   async resume(): Promise<void> {
-    if (this.ctx && this.ctx.state === "suspended") {
+    if (!this.ctx) return;
+    if (this.ctx.state !== "running") {
+      await this.ctx.resume().catch(() => undefined);
+    }
+    // Some mobile browsers resolve resume() without actually reaching
+    // "running" on the first attempt — nudge it once more.
+    if (this.ctx.state !== "running") {
       await this.ctx.resume().catch(() => undefined);
     }
   }
