@@ -1,5 +1,6 @@
 import type { BeatSlot, DanceStyle, MelodyNote, PercussionHit } from "@/types/rhythm";
 import { playPercussionHit, playVocalTone } from "./sound";
+import { unlockMobileAudioSession } from "./mobileUnlock";
 
 type BeatCallback = (beatIndex: number, time: number) => void;
 
@@ -44,6 +45,8 @@ export class RhythmEngine {
       const AudioCtor: typeof AudioContext | undefined =
         window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
       if (!AudioCtor) return false;
+
+      unlockMobileAudioSession();
 
       this.ctx = new AudioCtor();
       this.masterGain = this.ctx.createGain();
