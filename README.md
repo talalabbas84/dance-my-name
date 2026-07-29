@@ -1,36 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Dance My Name
 
-## Getting Started
+Type your name and turn it into a salsa or bachata rhythm. A playful,
+mobile-first, shareable web experience — no signup, no backend, no external
+audio files. Every percussion sound is synthesized live with the Web Audio
+API.
 
-First, run the development server:
+## Requirements
+
+- Node.js 20.9+ (this repo was built and tested on Node 22.23.0 — see
+  `.nvmrc`). Next.js 16 will fail to build on Node < 20.9.
+
+## Getting started
 
 ```bash
+nvm use          # picks up .nvmrc (Node 22.23.0)
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Other scripts:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run lint       # ESLint (flat config, eslint-config-next)
+npx tsc --noEmit   # strict TypeScript check
+npm run build      # production build (Turbopack)
+npm run start      # serve the production build
+```
 
-## Learn More
+## How it's organized
 
-To learn more about Next.js, take a look at the following resources:
+- `src/lib/rhythm/` — pure, framework-free rhythm logic: name validation and
+  syllable splitting (`name.ts`), the salsa/bachata pattern data
+  (`styles.ts`), syllable-to-beat mapping (`mapping.ts`), and share text/URL
+  helpers (`share.ts`).
+- `src/lib/audio/` — the Web Audio layer: oscillator/noise-based percussion
+  synthesis (`sound.ts`) and a look-ahead scheduler (`RhythmEngine.ts`) that
+  schedules beats against the `AudioContext` clock rather than `setInterval`.
+- `src/hooks/` — `useRhythmEngine` (React binding for the audio engine, with
+  a silent visual-only fallback if `AudioContext` is unavailable) and
+  `usePrefersReducedMotion`.
+- `src/components/` — presentation: `NameEntry`, `StyleToggle`,
+  `SyllableDisplay`, `BeatCounter`, `TempoControl`, `TapMode`,
+  `AudioControls`, `ShareButton`, `StoryCard`, and `RhythmPlayer` /
+  `DanceMyNameApp`, which compose everything into the result screen and the
+  overall landing → result state machine.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Adding a new style (merengue, cha-cha, reggaeton) means adding one entry to
+`RHYTHM_STYLES` in `src/lib/rhythm/styles.ts` — the rest of the app is
+data-driven off that definition.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Sharing a rhythm
 
-## Deploy on Vercel
+State lives entirely in the URL — no backend. A shared link like
+`/?name=Talal&style=bachata` restores the name and style on load. The Share
+button uses the Web Share API where available, falling back to copying a
+share-text string to the clipboard.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Deploying
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This is a stock Next.js App Router project — deploy directly on
+[Vercel](https://vercel.com/new) by importing the repo. No environment
+variables or backend services are required.

@@ -1,26 +1,80 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #120b14;
+  --surface: #211525;
+  --surface-2: #2b1c30;
+  --salsa: #ff4d5a;
+  --bachata: #e96ba8;
+  --gold: #ffc857;
+  --warm-white: #fff7ed;
+  --muted: #c8b8c9;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-salsa: var(--salsa);
+  --color-bachata: var(--bachata);
+  --color-gold: var(--gold);
+  --color-warm-white: var(--warm-white);
+  --color-muted: var(--muted);
+  --font-display: var(--font-fraunces);
+  --font-sans: var(--font-jakarta);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
+html {
+  color-scheme: dark;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--warm-white);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+.font-display {
+  font-family: var(--font-fraunces), ui-serif, Georgia, serif;
+}
+
+::selection {
+  background: var(--gold);
+  color: var(--bg);
+}
+
+/* Dance-floor spotlight grid texture used behind the hero and result screens. */
+.dance-floor-grid {
+  background-image:
+    linear-gradient(rgba(255, 247, 237, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 247, 237, 0.05) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, black 40%, transparent 90%);
+}
+
+.glass-panel {
+  background: rgba(33, 21, 37, 0.55);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 247, 237, 0.08);
+}
+
+@keyframes floaty {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-14px); }
+}
+
+.animate-floaty {
+  animation: floaty 6s ease-in-out infinite;
 }
